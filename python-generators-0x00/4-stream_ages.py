@@ -18,3 +18,17 @@ def stream_user_ages():
         print(f"Error: {e}")
         return None
 
+
+def calculate_average_age():
+    """Calculates average age using the generator"""
+
+    total_age=-0
+    count = 0
+
+    for age in stream_user_ages():
+        total_age += age
+        count += 1
+
+    average_age=total_age/cpunt if count>0 else 0
+    print (f"Average age of users : {average_age:.2f}")
+
