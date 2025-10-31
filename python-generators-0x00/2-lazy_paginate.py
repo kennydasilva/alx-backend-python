@@ -18,4 +18,12 @@ def paginate_users(page_size, offset):
 def lazy_pagination(page_size):
 
     """ Generation that lazily loads paginated data from the database"""
-    
+    offset=0
+
+    while true:
+        page= paginate_users(page_size, offset)
+
+        if not page:
+            break
+        yield page
+        offset += page_size
