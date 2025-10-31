@@ -4,11 +4,12 @@ seed = __import__('seed')
 
 def paginate_users(page_size, offset):
 
-    """Fecth  one page of users from the database"""
+    """Fetch one page of users from the database"""
 
     connection = seed.connect_to_prodev()
     cursor = connection.cursor(dictionary=True)
-    cursor.execute("SELECT 8FROM user_data LIMIT {page_size} OFFSET {offset}")
+    query = "SELECT * FROM user_data LIMIT %s OFFSET %s"
+    cursor.execute(query, (page_size, offset))
     rows = cursor.fetchall()
     cursor.close()
     connection.close()
@@ -17,11 +18,11 @@ def paginate_users(page_size, offset):
 
 def lazy_pagination(page_size):
 
-    """ Generation that lazily loads paginated data from the database"""
-    offset=0
+    """Generator that lazily loads paginated data from the database"""
+    offset = 0
 
-    while true:
-        page= paginate_users(page_size, offset)
+    while True:
+        page = paginate_users(page_size, offset)
 
         if not page:
             break
