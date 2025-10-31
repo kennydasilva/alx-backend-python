@@ -71,3 +71,35 @@ def create_table(connection):
     except mysql.connector.Error as err:
         print(f"Error creating table: {err}")
 
+#insert from CSV
+def insert_data(coconnection, csv_file):
+
+    try:
+        cursor = connection.cursor()
+
+        with open(csv_file, newline='', encoding='utf-8') as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+
+                    #check if user already exit
+                    cursor.execute("SELECT * FROM user_data where user_id=%s", (row['user_id'],))
+                    result =cursor.fetchone()
+
+                    if not result:
+                        if not result:
+                            cursor.execute("""
+                                INSERT INTO user_data(user_id, name,emil,age)
+                                VALUES(%s,%s,%s,%s)""",
+                                (row['user_id'], row['name'], row['email'], row['age']))
+                
+        connection.commit()
+        print("data inserted sucessfully")
+        cursor.close()
+    
+    except FileNotFoundError:
+        print(f"csv file '{csv_file}' not found.")
+
+    except mysql.connector.Error as err:
+        print(f"Error inserting data: {err}")
+
+    
