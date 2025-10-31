@@ -25,12 +25,13 @@ def connect_db():
 def create_database(connection):
 
     try:
-        curor=connection.cursor()
+        cursor = connection.cursor()
         cursor.execute("CREATE DATABASE IF NOT EXISTS ALX_prodev;")
+        connection.commit()
         cursor.close()
 
     except mysql.connector.Error as err:
-        print(f"Error creting database: {err}")
+        print(f"Error creating database: {err}")
 
 
 #connect directly to alx_prodev database
@@ -48,12 +49,11 @@ def connect_to_prodev():
     except mysql.connector.Error as err:
         print(f"Error: {err}")
         return None
-    
 #create table user_data
 def create_table(connection):
 
     try:
-        cursor=connection.cursor()
+        cursor = connection.cursor()
         query="""
         CREATE TABLE IF NOT EXISTS user_data(
             user_id char(36) PRIMARY KEY NOT NULL,
@@ -64,15 +64,15 @@ def create_table(connection):
             );
             """
         cursor.execute(query)
-        cursor.commit()
+        connection.commit()
         print("Table user_data created successfully")
         cursor.close()
 
     except mysql.connector.Error as err:
         print(f"Error creating table: {err}")
-
+        print(f"Error creating table: {err}")
 #insert from CSV
-def insert_data(coconnection, csv_file):
+def insert_data(connection, csv_file):
 
     try:
         cursor = connection.cursor()
@@ -81,25 +81,25 @@ def insert_data(coconnection, csv_file):
                 reader = csv.DictReader(file)
                 for row in reader:
 
-                    #check if user already exit
-                    cursor.execute("SELECT * FROM user_data where user_id=%s", (row['user_id'],))
-                    result =cursor.fetchone()
+                    # check if user already exists
+                    cursor.execute("SELECT * FROM user_data WHERE user_id=%s", (row['user_id'],))
+                    result = cursor.fetchone()
 
                     if not result:
-                        if not result:
-                            cursor.execute("""
-                                INSERT INTO user_data(user_id, name,emil,age)
+                        cursor.execute("""
+                                INSERT INTO user_data(user_id, name, email, age)
                                 VALUES(%s,%s,%s,%s)""",
                                 (row['user_id'], row['name'], row['email'], row['age']))
                 
         connection.commit()
-        print("data inserted sucessfully")
+        print("data inserted successfully")
         cursor.close()
     
     except FileNotFoundError:
         print(f"csv file '{csv_file}' not found.")
 
     except mysql.connector.Error as err:
+        print(f"Error inserting data: {err}")
         print(f"Error inserting data: {err}")
 
     
