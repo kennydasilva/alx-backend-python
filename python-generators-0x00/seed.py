@@ -48,3 +48,26 @@ def connect_to_prodev():
     except mysql.connector.Error as err:
         print(f"Error: {err}")
         return None
+    
+#create table user_data
+def create_table(connection):
+
+    try:
+        cursor=connection.cursor()
+        query="""
+        CREATE TABLE IF NOT EXISTS user_data(
+            user_id char(36) PRIMARY KEY NOT NULL,
+            name VARCHAR (100) NOT NULL,
+            email VARCHAR (100) NOT NULL,
+            age DECIMAL NOT NULL,
+            INDEX(user_id)
+            );
+            """
+        cursor.execute(query)
+        cursor.commit()
+        print("Table user_data created successfully")
+        cursor.close()
+
+    except mysql.connector.Error as err:
+        print(f"Error creating table: {err}")
+
