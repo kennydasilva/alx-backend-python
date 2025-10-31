@@ -33,3 +33,18 @@ def create_database(connection):
         print(f"Error creting database: {err}")
 
 
+#connect directly to alx_prodev database
+
+def connect_to_prodev():
+
+    try:
+        connection= mysql.connector.connect(
+            host='localhost',
+            user='root',
+            password='',
+            database='ALX_prodev'
+        )
+        return connection
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return None
