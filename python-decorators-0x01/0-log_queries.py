@@ -3,7 +3,7 @@ import sqlite3
 import functools
 
 
-#Decorator to log sql queries
+
 def log_queries(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -17,6 +17,7 @@ def log_queries(func):
             print(f"Executing query: {query}")
         return func(*args, **kwargs)
     return wrapper
+
 
 @log_queries
 def fetch_all_users(query):
