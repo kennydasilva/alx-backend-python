@@ -28,7 +28,7 @@ def fetch_all_users(query):
     return reults
 
 #Example execution
-if __name__ == "_main_":
+if __name__ == "__main__":
     users = fetch_all_users(query="SELECT*FROM users")
     print(users)
 
