@@ -31,3 +31,6 @@ def fetch_all_users(query):
 if __name__ == "_main_":
     users = fetch_all_users(query="SELECT*FROM users")
     print(users)
+
+
+
