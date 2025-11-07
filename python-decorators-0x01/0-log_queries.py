@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sqlite3
 import functools
+from datetime import datetime  
 
 
 def log_queries(func):
@@ -14,9 +15,10 @@ def log_queries(func):
         if query is None and len(args) > 0:
             query = args[0]
 
-        # Faz o log da query antes da execução
+        # Faz o log da query antes da execução, com data e hora
         if query is not None:
-            print(f"Executing query: {query}")
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(f"[{timestamp}] Executing query: {query}")
 
         # Executa a função original
         return func(*args, **kwargs)
@@ -33,6 +35,6 @@ def fetch_all_users(query):
     return results
 
 
-
+# Exemplo de execução
 users = fetch_all_users(query="SELECT * FROM users")
 print(users)
