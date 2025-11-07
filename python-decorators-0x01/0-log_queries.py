@@ -28,8 +28,8 @@ def fetch_all_users(query):
     conn.close()
     return reults
 
-    users = fetch_all_users(query="SELECT*FROM users")
-    print(users)
+users = fetch_all_users(query="SELECT*FROM users")
+print(users)
 
 
 
