@@ -17,3 +17,17 @@ def log_queries(func):
             print(f"Executing query: {query}")
         return func(*args, **kwargs)
     return wrapper
+
+@log_queries
+def fetch_all_users(query):
+    conn=sqlite3.connect('users.db')
+    cursor=conn.cursor()
+    cursor.execute(query)
+    reults=cursor.fetchall()
+    conn.close()
+    return reults
+
+#Example execution
+if __name__ == "_main_":
+    users = fetch_all_users(query="SELECT*FROM users")
+    print(users)
