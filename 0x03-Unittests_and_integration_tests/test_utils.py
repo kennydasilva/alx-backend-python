@@ -11,9 +11,7 @@ from utils import access_nested_map, get_json, memoize
 
 
 class TestAccessNestedMap(unittest.TestCase):
-    """
-    Test cases for access_nested_map
-    """
+    """Tests for access_nested_map"""
 
     @parameterized.expand([
         ({"a": 1}, ("a",), 1),
@@ -21,7 +19,6 @@ class TestAccessNestedMap(unittest.TestCase):
         ({"a": {"b": 2}}, ("a", "b"), 2),
     ])
     def test_access_nested_map(self, nested_map, path, expected):
-        """Test access_nested_map returns expected result"""
         self.assertEqual(access_nested_map(nested_map, path), expected)
 
     @parameterized.expand([
@@ -29,16 +26,13 @@ class TestAccessNestedMap(unittest.TestCase):
         ({"a": 1}, ("a", "b"), "b"),
     ])
     def test_access_nested_map_exception(self, nested_map, path, missing_key):
-        """Test that access_nested_map raises KeyError"""
         with self.assertRaises(KeyError) as context:
             access_nested_map(nested_map, path)
         self.assertIn(missing_key, str(context.exception))
 
 
 class TestGetJson(unittest.TestCase):
-    """
-    Test cases for get_json
-    """
+    """Tests for get_json"""
 
     @parameterized.expand([
         ("http://example.com", {"payload": True}),
@@ -46,7 +40,6 @@ class TestGetJson(unittest.TestCase):
     ])
     @patch("utils.urllib.request.urlopen")
     def test_get_json(self, test_url, test_payload, mock_urlopen):
-        """Test get_json returns expected payload"""
         mock_response = Mock()
         json_data = json.dumps(test_payload).encode("utf-8")
         mock_response.read.return_value = json_data
@@ -55,22 +48,17 @@ class TestGetJson(unittest.TestCase):
 
         result = get_json(test_url)
 
-        # Quebra de linha para evitar E501
         mock_urlopen.assert_called_once_with(
-            test_url
+            test_url,
         )
 
         self.assertEqual(result, test_payload)
 
 
 class TestMemoize(unittest.TestCase):
-    """
-    Test cases for memoize decorator
-    """
+    """Tests for memoize decorator"""
 
     def test_memoize(self):
-        """Test that memoize caches value"""
-
         class TestClass:
             def a_method(self):
                 return 42
