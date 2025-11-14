@@ -47,21 +47,15 @@ class TestGetJson(unittest.TestCase):
     @patch('utils.urllib.request.urlopen')
     def test_get_json(self, test_url, test_payload, mock_urlopen):
         """Test get_json returns expected payload"""
-        # Create a mock response that supports context manager
         mock_response = Mock()
         json_data = json.dumps(test_payload).encode('utf-8')
         mock_response.read.return_value = json_data
 
-        # Make the urlopen mock return our mock response
         mock_urlopen.return_value.__enter__.return_value = mock_response
 
-        # Call the function
         result = get_json(test_url)
 
-        # Verify urlopen was called with the correct URL
         mock_urlopen.assert_called_once_with(test_url)
-
-        # Verify the result matches the expected payload
         self.assertEqual(result, test_payload)
 
 
@@ -81,28 +75,16 @@ class TestMemoize(unittest.TestCase):
             def a_property(self):
                 return self.a_method()
 
-        # Create instance
         test_instance = TestClass()
 
-        # Mock the a_method
-        with patch.object(TestClass, 'a_method',
-                          return_value=42) as mock_method:
-            # Call a_property twice
+        with patch.object(TestClass, "a_method", return_value=42) as mock_method:
             result1 = test_instance.a_property
             result2 = test_instance.a_property
 
-            # Verify both calls return the same result
             self.assertEqual(result1, 42)
             self.assertEqual(result2, 42)
-
-            # Verify a_method was called only once
             mock_method.assert_called_once()
 
 
 if __name__ == '__main__':
     unittest.main()
-
-
-
-
-
