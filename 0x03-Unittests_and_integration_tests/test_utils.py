@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Unit tests for the utils module
+Unit tests for the utils module.
 """
 
 import json
@@ -15,7 +15,7 @@ from utils import memoize
 
 class TestAccessNestedMap(unittest.TestCase):
     """
-    Test cases for access_nested_map
+    Test cases for the access_nested_map function.
     """
 
     @parameterized.expand([
@@ -24,6 +24,9 @@ class TestAccessNestedMap(unittest.TestCase):
         ({"a": {"b": 2}}, ("a", "b"), 2),
     ])
     def test_access_nested_map(self, nested_map, path, expected):
+        """
+        Test that access_nested_map returns expected values.
+        """
         self.assertEqual(access_nested_map(nested_map, path), expected)
 
     @parameterized.expand([
@@ -31,6 +34,9 @@ class TestAccessNestedMap(unittest.TestCase):
         ({"a": 1}, ("a", "b"), "b"),
     ])
     def test_access_nested_map_exception(self, nested_map, path, missing_key):
+        """
+        Test that access_nested_map raises KeyError on missing keys.
+        """
         with self.assertRaises(KeyError) as context:
             access_nested_map(nested_map, path)
         self.assertIn(missing_key, str(context.exception))
@@ -38,7 +44,7 @@ class TestAccessNestedMap(unittest.TestCase):
 
 class TestGetJson(unittest.TestCase):
     """
-    Test cases for get_json
+    Test cases for the get_json function.
     """
 
     @parameterized.expand([
@@ -47,11 +53,14 @@ class TestGetJson(unittest.TestCase):
     ])
     @patch("utils.urllib.request.urlopen")
     def test_get_json(self, test_url, test_payload, mock_urlopen):
-        mock_response = Mock()
-        json_data = json.dumps(test_payload).encode("utf-8")
-        mock_response.read.return_value = json_data
+        """
+        Test that get_json returns the expected JSON payload.
+        """
+        mock_resp = Mock()
+        data = json.dumps(test_payload).encode("utf-8")
+        mock_resp.read.return_value = data
 
-        mock_urlopen.return_value.__enter__.return_value = mock_response
+        mock_urlopen.return_value.__enter__.return_value = mock_resp
 
         result = get_json(test_url)
 
@@ -63,10 +72,14 @@ class TestGetJson(unittest.TestCase):
 
 class TestMemoize(unittest.TestCase):
     """
-    Test cases for memoize decorator
+    Test cases for the memoize decorator.
     """
 
     def test_memoize(self):
+        """
+        Test that memoize caches the returned value of a method.
+        """
+
         class TestClass:
             def a_method(self):
                 return 42
@@ -75,15 +88,15 @@ class TestMemoize(unittest.TestCase):
             def a_property(self):
                 return self.a_method()
 
-        test_instance = TestClass()
+        inst = TestClass()
 
         with patch.object(
             TestClass,
             "a_method",
             return_value=42
         ) as mock_method:
-            result1 = test_instance.a_property
-            result2 = test_instance.a_property
+            result1 = inst.a_property
+            result2 = inst.a_property
 
             self.assertEqual(result1, 42)
             self.assertEqual(result2, 42)
