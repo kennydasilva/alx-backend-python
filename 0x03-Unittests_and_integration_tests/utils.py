@@ -3,7 +3,8 @@
 Generic utilities for github org client.
 """
 
-import requests
+import urllib.request
+import json
 from functools import wraps
 from typing import Mapping, Sequence, Any, Dict, Callable
 
@@ -17,42 +18,34 @@ __all__ = [
 
 def access_nested_map(nested_map: Mapping, path: Sequence) -> Any:
     """
-    Access a value in a nested map using a path of keys.
-
-    Example:
-        nested_map = {"a": {"b": {"c": 1}}}
-        access_nested_map(nested_map, ["a", "b", "c"])  # returns 1
+    Access a value in a nested map using a sequence of keys.
     """
-    value = nested_map
     for key in path:
-        if not isinstance(value, Mapping):
+        if isinstance(nested_map, Mapping) and key in nested_map:
+            nested_map = nested_map[key]
+        else:
             raise KeyError(key)
-        value = value[key]
-    return value
+    return nested_map
 
 
 def get_json(url: str) -> Dict:
-    """Fetch JSON data from a URL."""
-    response = requests.get(url)
-    return response.json()
+    """
+    Fetch JSON data from a URL.
+    """
+    with urllib.request.urlopen(url) as response:
+        return json.loads(response.read().decode('utf-8'))
 
 
 def memoize(fn: Callable) -> Callable:
     """
     Memoize decorator for class methods.
-
-    Example:
-        class MyClass:
-            @memoize
-            def a_method(self):
-                return 42
     """
     attr_name = "_" + fn.__name__
 
     @wraps(fn)
-    def wrapper(self):
+    def memoized(self):
         if not hasattr(self, attr_name):
             setattr(self, attr_name, fn(self))
         return getattr(self, attr_name)
 
-    return property(wrapper)
+    return property(memoized)

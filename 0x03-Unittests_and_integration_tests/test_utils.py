@@ -4,6 +4,7 @@ Unit tests for the utils module
 """
 
 import unittest
+import json
 from parameterized import parameterized
 from unittest.mock import patch, Mock
 from utils import access_nested_map, get_json, memoize
@@ -43,20 +44,24 @@ class TestGetJson(unittest.TestCase):
         ("http://example.com", {"payload": True}),
         ("http://holberton.io", {"payload": False}),
     ])
-    def test_get_json(self, test_url, test_payload):
+    @patch('utils.urllib.request.urlopen')
+    def test_get_json(self, test_url, test_payload, mock_urlopen):
         """Test get_json returns expected payload"""
+        # Create a mock response that supports context manager
         mock_response = Mock()
-        mock_response.json.return_value = test_payload
+        mock_response.read.return_value = json.dumps(test_payload).encode('utf-8')
+        
+        # Make the urlopen mock return our mock response when used as context manager
+        mock_urlopen.return_value.__enter__.return_value = mock_response
 
-        with patch(
-                'utils.requests.get',
-                return_value=mock_response
-        ) as mock_get:
+        # Call the function
+        result = get_json(test_url)
 
-            result = get_json(test_url)
-
-            mock_get.assert_called_once_with(test_url)
-            self.assertEqual(result, test_payload)
+        # Verify urlopen was called with the correct URL
+        mock_urlopen.assert_called_once_with(test_url)
+        
+        # Verify the result matches the expected payload
+        self.assertEqual(result, test_payload)
 
 
 class TestMemoize(unittest.TestCase):
@@ -75,18 +80,20 @@ class TestMemoize(unittest.TestCase):
             def a_property(self):
                 return self.a_method()
 
-        with patch.object(
-                TestClass,
-                "a_method",
-                return_value=42
-        ) as mock_method:
+        # Create instance
+        test_instance = TestClass()
 
-            test_instance = TestClass()
-            result1 = test_instance.a_property()
-            result2 = test_instance.a_property()
+        # Mock the a_method
+        with patch.object(TestClass, 'a_method', return_value=42) as mock_method:
+            # Call a_property twice
+            result1 = test_instance.a_property
+            result2 = test_instance.a_property
 
+            # Verify both calls return the same result
             self.assertEqual(result1, 42)
             self.assertEqual(result2, 42)
+            
+            # Verify a_method was called only once
             mock_method.assert_called_once()
 
 
