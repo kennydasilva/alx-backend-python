@@ -44,18 +44,22 @@ class TestGetJson(unittest.TestCase):
         ("http://example.com", {"payload": True}),
         ("http://holberton.io", {"payload": False}),
     ])
-    @patch('utils.urllib.request.urlopen')
+    @patch("utils.urllib.request.urlopen")
     def test_get_json(self, test_url, test_payload, mock_urlopen):
         """Test get_json returns expected payload"""
         mock_response = Mock()
-        json_data = json.dumps(test_payload).encode('utf-8')
+        json_data = json.dumps(test_payload).encode("utf-8")
         mock_response.read.return_value = json_data
 
         mock_urlopen.return_value.__enter__.return_value = mock_response
 
         result = get_json(test_url)
 
-        mock_urlopen.assert_called_once_with(test_url)
+        # Quebra de linha para evitar E501
+        mock_urlopen.assert_called_once_with(
+            test_url
+        )
+
         self.assertEqual(result, test_payload)
 
 
@@ -86,5 +90,5 @@ class TestMemoize(unittest.TestCase):
             mock_method.assert_called_once()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
