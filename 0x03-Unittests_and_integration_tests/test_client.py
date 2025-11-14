@@ -116,4 +116,45 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         cls.mock_get = cls.get_patcher.start()
 
         def side_effect(url):
-            class M
+            class MockResponse:
+                def __init__(self, json_data):
+                    self.json_data = json_data
+
+                def json(self):
+                    return self.json_data
+
+            if url == "https://api.github.com/orgs/google":
+                return MockResponse(cls.org_payload)
+            elif url == cls.org_payload['repos_url']:
+                return MockResponse(cls.repos_payload)
+            else:
+                return MockResponse({})
+
+        cls.mock_get.side_effect = side_effect
+
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Tear down class method to stop the patcher
+        """
+        cls.get_patcher.stop()
+
+    def test_public_repos(self):
+        """
+        Test public_repos method in integration
+        """
+        client = GithubOrgClient("google")
+        result = client.public_repos()
+        self.assertEqual(result, self.expected_repos)
+
+    def test_public_repos_with_license(self):
+        """
+        Test public_repos method with license filter in integration
+        """
+        client = GithubOrgClient("google")
+        result = client.public_repos(license="apache-2.0")
+        self.assertEqual(result, self.apache2_repos)
+
+
+if __name__ == '__main__':
+    unittest.main()
