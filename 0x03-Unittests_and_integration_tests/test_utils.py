@@ -3,15 +3,20 @@
 Unit tests for the utils module
 """
 
-import unittest
 import json
+import unittest
 from parameterized import parameterized
-from unittest.mock import patch, Mock
-from utils import access_nested_map, get_json, memoize
+from unittest.mock import Mock, patch
+
+from utils import access_nested_map
+from utils import get_json
+from utils import memoize
 
 
 class TestAccessNestedMap(unittest.TestCase):
-    """Tests for access_nested_map"""
+    """
+    Test cases for access_nested_map
+    """
 
     @parameterized.expand([
         ({"a": 1}, ("a",), 1),
@@ -32,7 +37,9 @@ class TestAccessNestedMap(unittest.TestCase):
 
 
 class TestGetJson(unittest.TestCase):
-    """Tests for get_json"""
+    """
+    Test cases for get_json
+    """
 
     @parameterized.expand([
         ("http://example.com", {"payload": True}),
@@ -51,12 +58,13 @@ class TestGetJson(unittest.TestCase):
         mock_urlopen.assert_called_once_with(
             test_url,
         )
-
         self.assertEqual(result, test_payload)
 
 
 class TestMemoize(unittest.TestCase):
-    """Tests for memoize decorator"""
+    """
+    Test cases for memoize decorator
+    """
 
     def test_memoize(self):
         class TestClass:
@@ -69,7 +77,11 @@ class TestMemoize(unittest.TestCase):
 
         test_instance = TestClass()
 
-        with patch.object(TestClass, "a_method", return_value=42) as mock_method:
+        with patch.object(
+            TestClass,
+            "a_method",
+            return_value=42
+        ) as mock_method:
             result1 = test_instance.a_property
             result2 = test_instance.a_property
 
