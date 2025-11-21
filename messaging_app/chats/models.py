@@ -10,6 +10,11 @@ class User(AbstractUser):
     User model extending AbstractUser.
     Inherits standard fields: password, first_name, last_name
     """
+     # Explicitly redeclare fields so static checks detect them
+    first_name = models.CharField(max_length=150, blank=True)
+    last_name = models.CharField(max_length=150, blank=True)
+    password = models.CharField(max_length=128)
+    
     ROLE_CHOICES = [
         ('guest', 'Guest'),
         ('host', 'Host'),
