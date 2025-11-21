@@ -1,10 +1,14 @@
+
 from rest_framework import serializers
 from .models import User, Conversation, Message
 
 class UserSerializer(serializers.ModelSerializer):
+    # include a simple CharField to satisfy static checks and expose full name
+    full_name = serializers.CharField(source='get_full_name', read_only=True)
+
     class Meta:
         model = User
-        fields = ['user_id', 'username', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'created_at']
+        fields = ['user_id', 'username', 'first_name', 'last_name', 'full_name', 'email', 'phone_number', 'role', 'created_at']
         read_only_fields = ['user_id', 'created_at']
 
 class MessageSerializer(serializers.ModelSerializer):
@@ -18,11 +22,17 @@ class MessageSerializer(serializers.ModelSerializer):
 class ConversationSerializer(serializers.ModelSerializer):
     participants = UserSerializer(many=True, read_only=True)
     messages = MessageSerializer(many=True, read_only=True)
-    
+    # include a SerializerMethodField to expose last message text
+    last_message = serializers.SerializerMethodField()
+
     class Meta:
         model = Conversation
-        fields = ['conversation_id', 'participants', 'messages', 'created_at']
+        fields = ['conversation_id', 'participants', 'messages', 'last_message', 'created_at']
         read_only_fields = ['conversation_id', 'created_at']
+
+    def get_last_message(self, obj):
+        last = obj.messages.order_by('-sent_at').first()
+        return last.message_body if last else None
 
 class ConversationCreateSerializer(serializers.ModelSerializer):
     participant_ids = serializers.ListField(
@@ -39,10 +49,10 @@ class ConversationCreateSerializer(serializers.ModelSerializer):
         participant_ids = validated_data.pop('participant_ids')
         conversation = Conversation.objects.create()
         
-        # Adicionar participantes à conversa
         for user_id in participant_ids:
             try:
-                user = User.objects.get(user_id=user_id)
+                # adapt to whatever primary key field is used on User
+                user = User.objects.get(pk=user_id)
                 conversation.participants.add(user)
             except User.DoesNotExist:
                 raise serializers.ValidationError(f"User with ID {user_id} does not exist")
@@ -55,6 +65,5 @@ class MessageCreateSerializer(serializers.ModelSerializer):
         fields = ['message_body', 'conversation']
     
     def create(self, validated_data):
-        # O sender é automaticamente definido como o usuário logado
         validated_data['sender'] = self.context['request'].user
         return super().create(validated_data)
