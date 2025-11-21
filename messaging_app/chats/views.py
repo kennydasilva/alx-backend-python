@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, filters, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
@@ -12,6 +12,8 @@ from .serializers import (
 
 class ConversationViewSet(viewsets.ModelViewSet):
     queryset = Conversation.objects.all()
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['participants__username', 'participants__email']
     
     def get_serializer_class(self):
         if self.action == 'create':
@@ -61,6 +63,8 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['message_body', 'sender__username']
     
     def get_serializer_class(self):
         if self.action == 'create':
