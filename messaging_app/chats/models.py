@@ -6,6 +6,10 @@ from django.contrib.auth.models import AbstractUser
 import uuid
 
 class User(AbstractUser):
+    """
+    User model extending AbstractUser.
+    Inherits standard fields: password, first_name, last_name
+    """
     ROLE_CHOICES = [
         ('guest', 'Guest'),
         ('host', 'Host'),
