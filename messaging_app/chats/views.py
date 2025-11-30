@@ -1,7 +1,10 @@
 from rest_framework import viewsets, status, filters, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+
 from .models import Conversation, Message
 from .serializers import (
     ConversationSerializer, 
@@ -9,9 +12,13 @@ from .serializers import (
     ConversationCreateSerializer,
     MessageCreateSerializer
 )
+from .permissions import IsParticipantOfConversation
+from .filters import MessageFilter
+from .pagination import StandardResultsSetPagination
 
 class ConversationViewSet(viewsets.ModelViewSet):
     queryset = Conversation.objects.all()
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
     filter_backends = [filters.SearchFilter]
     search_fields = ['participants__username', 'participants__email']
     
@@ -21,12 +28,10 @@ class ConversationViewSet(viewsets.ModelViewSet):
         return ConversationSerializer
     
     def get_queryset(self):
-        
         return Conversation.objects.filter(participants=self.request.user)
     
     def perform_create(self, serializer):
         conversation = serializer.save()
-        
         conversation.participants.add(self.request.user)
     
     @action(detail=True, methods=['post'])
@@ -57,30 +62,35 @@ class ConversationViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'])
     def messages(self, request, pk=None):
         conversation = self.get_object()
+        # aplica paginação manual aqui se precisares; mas viewset padrão já faz
         messages = conversation.messages.all()
         serializer = MessageSerializer(messages, many=True)
         return Response(serializer.data)
 
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
-    filter_backends = [filters.SearchFilter]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
+
+    # filtros + pesquisa + paginação
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter]
+    filterset_class = MessageFilter
+    pagination_class = StandardResultsSetPagination
+    ordering_fields = ['created_at']
+    ordering = ['-created_at']
     search_fields = ['message_body', 'sender__username']
-    
+
     def get_serializer_class(self):
         if self.action == 'create':
             return MessageCreateSerializer
         return MessageSerializer
     
     def get_queryset(self):
-        
         return Message.objects.filter(conversation__participants=self.request.user)
     
     def perform_create(self, serializer):
-        
         conversation = serializer.validated_data['conversation']
         if self.request.user not in conversation.participants.all():
             raise serializers.ValidationError("You are not a participant of this conversation")
-        
         serializer.save(sender=self.request.user)
     
     @action(detail=False, methods=['get'])
@@ -99,5 +109,11 @@ class MessageViewSet(viewsets.ModelViewSet):
         )
         
         messages = conversation.messages.all()
+        # aqui usamos o serializer actual (get_serializer)
+        page = self.paginate_queryset(messages)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = self.get_serializer(messages, many=True)
         return Response(serializer.data)
