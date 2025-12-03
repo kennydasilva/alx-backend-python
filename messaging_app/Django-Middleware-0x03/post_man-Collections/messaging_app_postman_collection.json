@@ -1,0 +1,355 @@
+{
+  "info": {
+    "name": "messaging_app - Postman Collection",
+    "_postman_id": "b8f2d3d6-0000-4000-8000-000000000001",
+    "description": "Collection para testar endpoints do projecto messaging_app (JWT auth, conversations, messages, paginação e filtros). Ajusta {{base_url}} se necessário.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get JWT Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/token/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "token",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Refresh JWT Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/token/refresh/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "token",
+            "refresh",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Conversation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Conversation Test\",\n  \"description\": \"Teste criação de conversa\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/conversations/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "conversations",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Add Participant to Conversation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": {{participant_user_id}}\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/conversations/{{conversation_id}}/add_participant/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "conversations",
+            "{{conversation_id}}",
+            "add_participant",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Send Message (create)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"conversation\": {{conversation_id}},\n  \"message_body\": \"Olá, esta é uma mensagem de teste\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/messages/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "messages",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "List Messages (page 1)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/messages/?page=1",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "messages",
+            ""
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Filter Messages by participant",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/messages/?participant={{participant_user_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "messages",
+            ""
+          ],
+          "query": [
+            {
+              "key": "participant",
+              "value": "{{participant_user_id}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Filter Messages by date range",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/messages/?created_after={{start_iso}}&created_before={{end_iso}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "messages",
+            ""
+          ],
+          "query": [
+            {
+              "key": "created_after",
+              "value": "{{start_iso}}"
+            },
+            {
+              "key": "created_before",
+              "value": "{{end_iso}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get messages for a conversation (ConversationViewSet action)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/conversations/{{conversation_id}}/messages/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "conversations",
+            "{{conversation_id}}",
+            "messages",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get messages for a conversation (MessageViewSet action conversation_messages)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/messages/conversation_messages/?conversation_id={{conversation_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "messages",
+            "conversation_messages",
+            ""
+          ],
+          "query": [
+            {
+              "key": "conversation_id",
+              "value": "{{conversation_id}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "username",
+      "value": "your_username"
+    },
+    {
+      "key": "password",
+      "value": "your_password"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "refresh_token",
+      "value": ""
+    },
+    {
+      "key": "conversation_id",
+      "value": "1"
+    },
+    {
+      "key": "participant_user_id",
+      "value": "2"
+    },
+    {
+      "key": "start_iso",
+      "value": "2025-11-01T00:00:00Z"
+    },
+    {
+      "key": "end_iso",
+      "value": "2025-11-30T23:59:59Z"
+    }
+  ]
+}
