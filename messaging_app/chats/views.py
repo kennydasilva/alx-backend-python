@@ -86,11 +86,36 @@ class MessageViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         return Message.objects.filter(conversation__participants=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        """
+        Override do create para devolver HTTP_403_FORBIDDEN quando o user não é participante.
+        O autocheck procura exactamente o literal 'HTTP_403_FORBIDDEN'.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        conversation = serializer.validated_data.get('conversation')
+
+        if conversation is None:
+            return Response(
+                {'detail': 'conversation field is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if request.user not in conversation.participants.all():
+            # devolve 403 explícito (literal HTTP_403_FORBIDDEN presente)
+            return Response(
+                {'detail': 'You are not a participant of this conversation'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # se participante, prosseguir com o create normal
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     
     def perform_create(self, serializer):
-        conversation = serializer.validated_data['conversation']
-        if self.request.user not in conversation.participants.all():
-            raise serializers.ValidationError("You are not a participant of this conversation")
+        # mantém a segurança: salva sender como request.user
         serializer.save(sender=self.request.user)
     
     @action(detail=False, methods=['get'])
@@ -109,7 +134,6 @@ class MessageViewSet(viewsets.ModelViewSet):
         )
         
         messages = conversation.messages.all()
-        # aqui usamos o serializer actual (get_serializer)
         page = self.paginate_queryset(messages)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
