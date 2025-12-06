@@ -4,6 +4,8 @@ import time
 from collections import deque, defaultdict
 import threading
 import json
+# --- RolepermissionMiddleware ---
+from django.http import HttpResponseForbidden
 
 # --- RestrictAccessByTimeMiddleware ---
 class RestrictAccessByTimeMiddleware:
@@ -85,3 +87,35 @@ class RateLimitMiddleware:
             #     pass
 
         return self.get_response(request)
+
+
+
+class RolepermissionMiddleware:
+    """
+    Allows access only to users with role 'admin' or 'moderator'.
+    As a fallback, also allows user.is_staff or user.is_superuser.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        user = getattr(request, "user", None)
+
+        # If the user is not authenticated → deny
+        if not user or not getattr(user, "is_authenticated", False):
+            return HttpResponseForbidden("Access denied: authentication required")
+
+        # Try to get the 'role' attribute
+        role = getattr(user, "role", None)
+
+        # Allow if role is 'admin' or 'moderator'
+        if role in ("admin", "moderator"):
+            return self.get_response(request)
+
+        # Fallback: allow if is_staff or is_superuser
+        if getattr(user, "is_staff", False) or getattr(user, "is_superuser", False):
+            return self.get_response(request)
+
+        # Otherwise deny
+        return HttpResponseForbidden("Access denied: insufficient permissions")
