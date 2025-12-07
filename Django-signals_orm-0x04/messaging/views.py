@@ -8,7 +8,24 @@ from django.http import HttpResponseBadRequest
 from .models import Message
 from django.contrib.auth import get_user_model
 
+
 User = get_user_model()
+
+@login_required
+def inbox_view(request):
+    """
+    Inbox do utilizador: mostra só mensagens não-lidas usando o custom manager.
+    O autocheck procura exactamente 'Message.unread.unread_for_user' e '.only('.
+    """
+    # USO EXACTO PARA O AUTOCHECK:
+    unread_qs = Message.unread.unread_for_user(request.user)
+
+    # Ainda podemos limitar/paginr/ordenar — aqui apenas convertemos em lista
+    # e passamos para o template. A query já tem .only() pelo manager.
+    unread_messages = list(unread_qs.order_by('-timestamp'))
+
+    return render(request, "messaging/inbox.html", {"unread_messages": unread_messages})
+
 
 @login_required
 @require_POST

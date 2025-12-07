@@ -2,6 +2,7 @@
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+from .managers import UnreadMessagesManager
 
 User = settings.AUTH_USER_MODEL
 
@@ -58,6 +59,8 @@ class Message(models.Model):
     unread = UnreadMessagesManager()  # custom manager
 
     edited = models.BooleanField(default=False)
+    objects = models.Manager()  # default manager
+    unread = UnreadMessagesManager()  
 
     class Meta:
         ordering = ['timestamp']  # ordenar cronologicamente ajuda em nests

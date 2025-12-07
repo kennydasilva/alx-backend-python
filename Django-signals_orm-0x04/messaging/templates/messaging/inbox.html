@@ -1,0 +1,13 @@
+<!-- messaging/templates/messaging/inbox.html -->
+<h1>Inbox (não-lidas)</h1>
+<ul>
+  {% for m in unread_messages %}
+    <li>
+      <strong>{{ m.sender }}</strong> — {{ m.timestamp }}<br>
+      {{ m.content|truncatechars:120 }}
+      <a href="{% url 'messaging:message_detail' m.id %}">ver</a>
+    </li>
+  {% empty %}
+    <li>Sem mensagens não-lidas.</li>
+  {% endfor %}
+</ul>
