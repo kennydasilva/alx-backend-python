@@ -12,6 +12,7 @@ urlpatterns = [
     path('message/<int:parent_id>/reply/', views.reply_message, name='reply_message'),
     path('thread/<int:message_id>/', views.thread_view, name='thread_view'),
     path('inbox/', views.inbox_view, name='inbox'),
+    path('conversations/', conversation_list, name='conversation_list'),
 
 
 ]

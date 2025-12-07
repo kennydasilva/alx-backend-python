@@ -7,6 +7,7 @@ from django.db import connection
 from django.http import HttpResponseBadRequest
 from .models import Message
 from django.contrib.auth import get_user_model
+from django.views.decorators.cache import cache_page
 
 
 User = get_user_model()
@@ -179,3 +180,15 @@ def thread_view(request, message_id):
         'query_count': query_count,
     }
     return render(request, 'messaging/thread.html', context)
+
+
+
+@login_required
+@cache_page(60)   
+def conversation_list(request):
+    """
+    Lista mensagens para uma conversa.
+    Esta view está agora em cache por 60 segundos.
+    """
+    messages = Message.objects.filter(receiver=request.user).select_related('sender').order_by('-timestamp')
+    return render(request, 'chats/conversation_list.html', {'messages': messages})
