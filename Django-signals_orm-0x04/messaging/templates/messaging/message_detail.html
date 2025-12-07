@@ -1,0 +1,31 @@
+<!-- messaging/message_detail.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Message detail</title>
+</head>
+<body>
+  <h1>Message</h1>
+  <p><strong>From:</strong> {{ message.sender }}</p>
+  <p><strong>To:</strong> {{ message.receiver }}</p>
+  <p><strong>Content:</strong> {{ message.content }}</p>
+  <p><strong>Edited:</strong> {{ message.edited }}</p>
+
+  <h2>History</h2>
+  {% if history %}
+    <ul>
+      {% for h in history %}
+        <li>
+          <strong>{{ h.edited_at }} by {{ h.edited_by }}</strong>
+          <div>{{ h.old_content|linebreaks }}</div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No edits yet.</p>
+  {% endif %}
+
+  <p><a href="{% url 'messaging:edit_message' message.id %}">Edit</a></p>
+</body>
+</html>
