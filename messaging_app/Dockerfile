@@ -8,6 +8,8 @@ ENV PYTHONUNBUFFERED=1
 #3.Diretorio de trabalho
 WORKDIR /app
 
+EXPOSE 8000
+
 # 4. Copiar requirements
 COPY requirements.txt /app/
 
@@ -20,7 +22,7 @@ RUN pip install  --upgrade pip\
 COPY . /app/
 
 # 7. Expor a porta do Django
-EXPOSE 8000
+
 
 # 8. Comando para iniciar o servidor
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
