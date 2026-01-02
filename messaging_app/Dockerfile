@@ -1,14 +1,15 @@
 # 1. image base
 FROM python:3.10
 
+
+WORKDIR /app
+EXPOSE 8000
 # 2. variaveis de ambiente
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 #3.Diretorio de trabalho
-WORKDIR /app
 
-EXPOSE 8000
 
 # 4. Copiar requirements
 COPY requirements.txt /app/
