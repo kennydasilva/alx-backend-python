@@ -8,4 +8,4 @@ mysqlclient==2.2.7
 PyJWT==2.10.1
 sqlparse==0.5.4
 python-dotenv==1.0.1
-python-dotenv
+
