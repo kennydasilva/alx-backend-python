@@ -1,17 +1,17 @@
 #!/bin/bash
 
-echo "checking if minikube is installed..."
-if ! command -v minikue &> /dev/null
+echo "Checking if Minikube is installed..."
+if ! command -v minikube &> /dev/null
 then
-    echo "Minikube is not installed . please install minikube first."
+    echo "Minikube is not installed. Please install Minikube first."
     exit 1
 fi
 
-echo "Starting Minikube clauster..."
+echo "Starting Minikube cluster..."
 minikube start
 
-echo "verifying kubernetes clauster"
-kubectl clauster-info
+echo "Verifying Kubernetes cluster info..."
+kubectl cluster-info
 
-echo "retrieving available pos.."
+echo "Retrieving available pods..."
 kubectl get pods -A
