@@ -1,0 +1,17 @@
+#!/bin/bash
+
+echo "checking if minikube is installed..."
+if ! command -v minikue &> /dev/null
+then
+    echo "Minikube is not installed . please install minikube first."
+    exit 1
+fi
+
+echo "Starting Minikube clauster..."
+minikube start
+
+echo "verifying kubernetes clauster"
+kubectl clauster-info
+
+echo "retrieving available pos.."
+kubectl get pods -A
