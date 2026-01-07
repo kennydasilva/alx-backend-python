@@ -1,0 +1,2 @@
+🤷  The control-plane node minikube host is not running: state=Stopped
+👉  To start a cluster, run: "minikube start"
