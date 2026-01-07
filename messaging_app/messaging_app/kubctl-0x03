@@ -1,0 +1,18 @@
+#!/bin/bash
+
+echo "Applying updated BLUE deployment (v2.0)..."
+kubectl apply -f blue_deployment.yaml
+
+echo "Monitoring rolling update..."
+kubectl rollout status deployment messaging-app-blue
+
+SERVICE_URL=$(minikube service messaging-service --url | head -n 1)
+
+echo "Testing availability during rollout..."
+for i in {1..20}; do
+    curl -s -o /dev/null -w "%{http_code}\n" "$SERVICE_URL"
+    sleep 1
+done
+
+echo "Verifying current pods..."
+kubectl get pods -l version=blue
