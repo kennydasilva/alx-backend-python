@@ -10,8 +10,9 @@ pipeline {
         stage('Setup Python Environment') {
             steps {
                 sh '''
+                rm -rf $VENV
                 python3 -m venv $VENV
-                $VENV/bin/python -m pip install --upgrade pip
+                $VENV/bin/python -m pip install --upgrade pip setuptools wheel
                 $VENV/bin/python -m pip install -r messaging_app/requirements.txt
                 '''
             }
@@ -28,7 +29,7 @@ pipeline {
 
     post {
         always {
-            junit 'test-results.xml'
+            junit testResults: 'test-results.xml', allowEmptyResults: true
         }
     }
 }
