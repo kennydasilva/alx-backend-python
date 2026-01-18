@@ -11,8 +11,9 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 git credentialsId: 'github-credentials', 
-                    url: '${REPO_URL}',
+                    url: '${REPO_URL}', 
                     branch: 'main'
+                sh 'git branch'
             }
         }
 
