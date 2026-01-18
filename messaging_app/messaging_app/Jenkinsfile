@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+
+    environment {
+        VENV = "venv"
+    }
+
+    stages {
+
+        stage('Setup Python Environment') {
+            steps {
+                sh '''
+                rm -rf venv
+                python3 -m venv venv
+                venv/bin/python -m ensurepip --upgrade
+                venv/bin/python -m pip install --upgrade pip setuptools wheel
+                venv/bin/pip install -r messaging_app/requirements.txt
+                '''
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh '''
+                $VENV/bin/python -m pytest messaging_app --junitxml=test-results.xml
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                if (fileExists('test-results.xml')) {
+                    junit 'test-results.xml'
+                } else {
+                    echo "No test results found. Skipping JUnit report."
+                }
+            }
+        }
+    }
+}
