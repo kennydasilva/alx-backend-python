@@ -1,10 +1,10 @@
-name: CI - Testing and Code Quality
+name: Django CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ "main", "master" ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ "main", "master" ]
 
 jobs:
   test:
@@ -14,92 +14,56 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: messaging_app_test
+          MYSQL_DATABASE: test_db
           MYSQL_USER: test_user
           MYSQL_PASSWORD: test_password
-        options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
+          MYSQL_ROOT_PASSWORD: root_password
         ports:
           - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DB_NAME: test_db
+      DB_USER: test_user
+      DB_PASSWORD: test_password
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
 
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up Python 3.x
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
-        cache: 'pip'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y mysql-client
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r messaging_app/requirements.txt
+          pip install flake8 coverage pytest pytest-django
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip setuptools wheel
-        pip install -r messaging_app/requirements.txt
-        pip install flake8 pytest pytest-cov pytest-django
+      - name: Run database migrations
+        run: |
+          python messaging_app/manage.py migrate
 
-    - name: Lint with flake8
-      run: |
-        # Stop the build if there are Python syntax errors or undefined names
-        flake8 messaging_app --count --select=E9,F63,F7,F82 --show-source --statistics
-        # Exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 messaging_app --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-      continue-on-error: false
+      - name: Run Django tests with coverage
+        run: |
+          coverage run manage.py test
+          coverage xml
+          coverage report
 
-    - name: Wait for MySQL to be ready
-      run: |
-        for i in {1..30}; do
-          mysql -h 127.0.0.1 -u test_user -ptest_password -e "SELECT 1" &> /dev/null && break || sleep 1
-        done
-
-    - name: Run migrations
-      run: |
-        cd messaging_app && python manage.py migrate --noinput || true
-
-    - name: Run tests with coverage
-      run: |
-        pytest messaging_app --junitxml=test-results.xml --cov=messaging_app --cov-report=html --cov-report=xml
-      env:
-        DATABASE_URL: mysql://test_user:test_password@127.0.0.1:3306/messaging_app_test
-
-    - name: Upload test results
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: test-results
-        path: test-results.xml
-
-    - name: Upload coverage reports
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: coverage-report
-        path: |
-          htmlcov/
-          coverage.xml
-
-    - name: Publish test results
-      if: always()
-      uses: dorny/test-reporter@v1
-      with:
-        name: Test Results
-        path: test-results.xml
-        reporter: 'java-junit'
-        fail-on-error: true
-
-    - name: Upload coverage to Codecov
-      if: always()
-      uses: codecov/codecov-action@v3
-      with:
-        files: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: false
+      - name: Run flake8 linting
+        run: |
+          flake8 messaging_app
+          
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
